@@ -4,7 +4,9 @@
 
 # Award Architect
 
-A brutalist-styled personal tool for travel award points strategy: a real award-search handoff to PointsYeah, an AI-generated strategic brief for the route, and a credit-card-to-airline points transfer yield calculator.
+A personal tool for travel award points strategy: a real award-search handoff to PointsYeah, an AI-generated strategic brief for the route, and a credit-card-to-airline points transfer yield calculator.
+
+**🔗 Live demo:** https://award-flight-search-mona-m.vercel.app
 
 **Personal-use demo** — not intended as a public, high-traffic product. See "Data Source" below for why.
 
