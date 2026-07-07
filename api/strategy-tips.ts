@@ -56,7 +56,7 @@ Provide exactly 3 concise, strategic tips for maximizing award travel on this sp
 Return the response as a strict JSON array of 3 strings.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: process.env.GEMINI_MODEL || 'gemini-flash-latest',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
