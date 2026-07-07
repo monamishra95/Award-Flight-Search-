@@ -5,9 +5,7 @@
 
 import { useState, useEffect } from 'react';
 
-// Loyalty program codes verified against a live PointsYeah search URL
-// (https://www.pointsyeah.com/explorer/search?...&programs=AA,AC,AM,...).
-// Friendly names are standard public program names, not PointsYeah-internal data.
+// Loyalty program codes verified against a live PointsYeah search URL.
 const PROGRAMS = [
   { code: 'AA', name: 'American Airlines AAdvantage', group: 'US' },
   { code: 'DL', name: 'Delta Air Lines SkyMiles', group: 'US' },
@@ -30,40 +28,78 @@ const PROGRAMS = [
 
 const CABINS = ['Economy', 'Premium Economy', 'Business', 'First'] as const;
 
+// Transfer partners and ratios are reference values as of early 2025.
+// Promotional bonuses change frequently — verify on each program's site before transferring.
 const transferData = {
   chase_ur: {
-    name: "Chase Ultimate Rewards",
+    name: 'Chase Ultimate Rewards',
     partners: [
-      { airline: 'United MileagePlus', ratio: 1, bonus: 0, time: 'Instant' },
-      { airline: 'Air France/KLM Flying Blue', ratio: 1, bonus: 0.25, time: 'Instant' },
-      { airline: 'Southwest Rapid Rewards', ratio: 1, bonus: 0, time: 'Instant' },
+      { airline: 'United MileagePlus',          ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Air Canada Aeroplan',          ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'British Airways Avios',        ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Air France/KLM Flying Blue',   ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Virgin Atlantic Flying Club',  ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Singapore Airlines KrisFlyer', ratio: 1, bonus: 0, time: '24 Hours'  },
+      { airline: 'Southwest Rapid Rewards',      ratio: 1, bonus: 0, time: 'Instant'   },
     ],
   },
   amex_mr: {
-    name: "Amex Membership Rewards",
+    name: 'Amex Membership Rewards',
     partners: [
-      { airline: 'Delta SkyMiles', ratio: 1, bonus: 0, time: 'Instant' },
-      { airline: 'Virgin Atlantic Flying Club', ratio: 1, bonus: 0.30, time: 'Instant' },
-      { airline: 'ANA Mileage Club', ratio: 1, bonus: 0, time: '48 Hours' },
+      { airline: 'Delta SkyMiles',               ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Air Canada Aeroplan',          ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'British Airways Avios',        ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Air France/KLM Flying Blue',   ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Virgin Atlantic Flying Club',  ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Singapore Airlines KrisFlyer', ratio: 1, bonus: 0, time: '24 Hours'  },
+      { airline: 'ANA Mileage Club',             ratio: 1, bonus: 0, time: '48 Hours'  },
+      { airline: 'Avianca LifeMiles',            ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Etihad Guest',                 ratio: 1, bonus: 0, time: '48 Hours'  },
     ],
   },
   citi_ty: {
-    name: "Citi ThankYou Points",
+    name: 'Citi ThankYou Points',
     partners: [
-      { airline: 'Avianca LifeMiles', ratio: 1, bonus: 0.15, time: 'Instant' },
-      { airline: 'Singapore KrisFlyer', ratio: 1, bonus: 0, time: '24 Hours' },
+      { airline: 'Avianca LifeMiles',            ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Air France/KLM Flying Blue',   ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Turkish Airlines Miles&Smiles', ratio: 1, bonus: 0, time: '3-5 Days' },
+      { airline: 'Singapore Airlines KrisFlyer', ratio: 1, bonus: 0, time: '24 Hours'  },
+      { airline: 'Etihad Guest',                 ratio: 1, bonus: 0, time: '48 Hours'  },
+    ],
+  },
+  capital_one: {
+    name: 'Capital One Venture X',
+    partners: [
+      { airline: 'Air Canada Aeroplan',          ratio: 1, bonus: 0, time: '1-2 Days'  },
+      { airline: 'Turkish Airlines Miles&Smiles', ratio: 1, bonus: 0, time: '1-2 Days' },
+      { airline: 'Avianca LifeMiles',            ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Air France/KLM Flying Blue',   ratio: 1, bonus: 0, time: '1-2 Days'  },
+      { airline: 'British Airways Avios',        ratio: 1, bonus: 0, time: '1-2 Days'  },
+      { airline: 'Singapore Airlines KrisFlyer', ratio: 1, bonus: 0, time: '1-2 Days'  },
+      { airline: 'Etihad Guest',                 ratio: 1, bonus: 0, time: '1-2 Days'  },
+      { airline: 'Finnair Plus',                 ratio: 1, bonus: 0, time: '1-2 Days'  },
+    ],
+  },
+  bilt: {
+    name: 'Bilt Rewards',
+    partners: [
+      { airline: 'United MileagePlus',           ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'American Airlines AAdvantage', ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Alaska Airlines Mileage Plan', ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Air Canada Aeroplan',          ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Air France/KLM Flying Blue',   ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'British Airways Avios',        ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Virgin Atlantic Flying Club',  ratio: 1, bonus: 0, time: 'Instant'   },
+      { airline: 'Turkish Airlines Miles&Smiles', ratio: 1, bonus: 0, time: 'Instant'  },
     ],
   },
 };
 
+type CcKey = keyof typeof transferData;
+
 /**
  * Builds a real, prefilled PointsYeah search URL. Parameter names and value
- * formats here were verified against a live PointsYeah search result
- * (not guessed) — see README "Data Source" section. Values for `collection`,
- * `mixedCabin`, `sort`, and `trip` are copied verbatim from that verified
- * sample since their full semantics aren't publicly documented; everything
- * else (departure, arrival, dates, programs, cabins, weekend_only) is driven
- * by the user's actual form input.
+ * formats verified against a live PointsYeah search result — see README.
  */
 function buildPointsYeahUrl(params: {
   departure: string;
@@ -89,6 +125,21 @@ function buildPointsYeahUrl(params: {
   return `https://www.pointsyeah.com/explorer/search?${qs.toString()}`;
 }
 
+/** Computes how many miles a points balance yields per transfer partner. */
+function computeTransfers(balances: Record<CcKey, string>) {
+  const results: { ccName: string; airline: string; miles: number; bonus: number; time: string }[] = [];
+  for (const [key, data] of Object.entries(transferData) as [CcKey, typeof transferData[CcKey]][]) {
+    const pts = Number(balances[key]);
+    if (!pts || pts < 1000) continue;
+    for (const p of data.partners) {
+      const base = pts * p.ratio;
+      const total = Math.floor(base + base * p.bonus);
+      results.push({ ccName: data.name, airline: p.airline, miles: total, bonus: p.bonus, time: p.time });
+    }
+  }
+  return results;
+}
+
 export default function App() {
   const [today, setToday] = useState('');
 
@@ -101,16 +152,20 @@ export default function App() {
   const [weekendOnly, setWeekendOnly] = useState(false);
   const [selectedPrograms, setSelectedPrograms] = useState<string[]>(PROGRAMS.map(p => p.code));
   const [selectedCabins, setSelectedCabins] = useState<string[]>([...CABINS]);
-  const [program, setProgram] = useState('United MileagePlus');
   const [isSearching, setIsSearching] = useState(false);
   const [aiTips, setAiTips] = useState<string[] | null>(null);
   const [searchError, setSearchError] = useState('');
   const [lastSearchUrl, setLastSearchUrl] = useState('');
 
-  // Yield Calculator State
-  const [ccProgram, setCcProgram] = useState<keyof typeof transferData>('chase_ur');
-  const [pointsAmount, setPointsAmount] = useState<string>('');
-  const [transferResults, setTransferResults] = useState<{ airline: string; time: string; bonus: number; totalMiles: number }[] | null>(null);
+  // Points Balances State
+  const [balances, setBalances] = useState<Record<CcKey, string>>({
+    chase_ur: '', amex_mr: '', citi_ty: '', capital_one: '', bilt: '',
+  });
+
+  // Yield Calculator State (standalone)
+  const [calcProgram, setCalcProgram] = useState<CcKey>('chase_ur');
+  const [calcPoints, setCalcPoints] = useState('');
+  const [calcResults, setCalcResults] = useState<{ airline: string; time: string; bonus: number; totalMiles: number }[] | null>(null);
 
   useEffect(() => {
     const d = new Date().toISOString().split('T')[0];
@@ -133,14 +188,8 @@ export default function App() {
 
   const handleSearchFlights = async () => {
     const o = origin.trim();
-    if (!o) {
-      setSearchError('Origin airport code is required.');
-      return;
-    }
-    if (selectedPrograms.length === 0) {
-      setSearchError('Select at least one loyalty program.');
-      return;
-    }
+    if (!o) { setSearchError('Origin airport code is required.'); return; }
+    if (selectedPrograms.length === 0) { setSearchError('Select at least one loyalty program.'); return; }
 
     setIsSearching(true);
     setSearchError('');
@@ -149,8 +198,7 @@ export default function App() {
     const url = buildPointsYeahUrl({
       departure: o,
       arrival: searchAnywhere ? '' : destination.trim(),
-      startDate,
-      endDate,
+      startDate, endDate,
       programs: selectedPrograms,
       cabins: selectedCabins,
       weekendOnly,
@@ -158,15 +206,21 @@ export default function App() {
     setLastSearchUrl(url);
     window.open(url, '_blank', 'noopener,noreferrer');
 
-    // Real award availability is searched on PointsYeah (above). The call
-    // below is a separate, server-proxied Gemini request for general
-    // strategic tips — it does not pull live award data of its own.
+    // Compute transfer possibilities from entered balances
+    const transfers = computeTransfers(balances);
+
     try {
-      const d = searchAnywhere ? 'Anywhere' : destination.trim() || 'your destination';
+      const dest = searchAnywhere ? 'Anywhere' : destination.trim() || 'your destination';
       const res = await fetch('/api/strategy-tips', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ origin: o, destination: d, depDate: startDate, program }),
+        body: JSON.stringify({
+          origin: o,
+          destination: dest,
+          depDate: startDate,
+          cabins: selectedCabins,
+          transfers, // personalized points data
+        }),
       });
 
       if (!res.ok) {
@@ -184,31 +238,22 @@ export default function App() {
   };
 
   const handleCalculateTransfer = () => {
-    const pts = Number(pointsAmount);
-    if (!pts || pts < 1000) {
-      alert('Enter a valid point value (minimum 1,000).');
-      return;
-    }
-
-    const programData = transferData[ccProgram];
-    const results = programData.partners.map((partner) => {
-      const baseMiles = pts * partner.ratio;
-      const bonusMiles = baseMiles * partner.bonus;
-      const totalMiles = baseMiles + bonusMiles;
-
-      return {
-        airline: partner.airline,
-        time: partner.time,
-        bonus: partner.bonus,
-        totalMiles,
-      };
-    });
-
-    setTransferResults(results);
+    const pts = Number(calcPoints);
+    if (!pts || pts < 1000) { alert('Enter a valid point value (minimum 1,000).'); return; }
+    const results = transferData[calcProgram].partners.map(p => ({
+      airline: p.airline,
+      time: p.time,
+      bonus: p.bonus,
+      totalMiles: Math.floor(pts * p.ratio * (1 + p.bonus)),
+    }));
+    setCalcResults(results);
   };
 
   const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition placeholder-gray-300";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1.5";
+
+  const hasAnyBalance = Object.values(balances).some(v => Number(v) >= 1000);
+  const transferSummary = hasAnyBalance ? computeTransfers(balances) : [];
 
   return (
     <div className="min-h-screen py-10 px-4 flex justify-center" style={{ backgroundColor: '#f0f4f8' }}>
@@ -223,21 +268,20 @@ export default function App() {
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Award Architect</h1>
           </div>
           <p className="text-gray-400 text-sm ml-12">
-            Real award search via PointsYeah · AI strategy tips · Points yield calculator
+            Real award search · Personalized AI strategy · Points yield calculator
           </p>
         </header>
 
         {/* SECTION 1: FLIGHT SEARCH */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 flex flex-col gap-6">
-
           <div>
             <div className="flex items-center gap-2.5 mb-1">
               <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: '#4f46e5' }}>1</span>
               <h2 className="text-base font-semibold text-gray-900">Route Intelligence</h2>
             </div>
             <p className="text-gray-400 text-xs leading-relaxed ml-8">
-              Builds a prefilled search on PointsYeah and opens it in a new tab —
-              real award availability across the programs you select. This app does not host its own flight data.
+              Builds a prefilled award search and opens it in a new tab —
+              real availability across the programs you select. This app does not host its own flight data.
             </p>
           </div>
 
@@ -265,65 +309,32 @@ export default function App() {
                 className={inputClass + ' disabled:opacity-40 disabled:bg-gray-50'}
               />
               <label className="flex items-center gap-2 mt-2 text-xs text-gray-400 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={searchAnywhere}
-                  onChange={(e) => setSearchAnywhere(e.target.checked)}
-                  style={{ accentColor: '#4f46e5' }}
-                />
+                <input type="checkbox" checked={searchAnywhere} onChange={(e) => setSearchAnywhere(e.target.checked)} style={{ accentColor: '#4f46e5' }} />
                 Search anywhere (explore mode)
               </label>
             </div>
             <div>
               <label className={labelClass}>Search From</label>
-              <input
-                type="date"
-                min={today}
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className={inputClass}
-              />
+              <input type="date" min={today} value={startDate} onChange={(e) => setStartDate(e.target.value)} className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Search Through</label>
-              <input
-                type="date"
-                min={startDate || today}
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className={inputClass}
-              />
+              <input type="date" min={startDate || today} value={endDate} onChange={(e) => setEndDate(e.target.value)} className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Cabins</label>
               <div className="flex flex-wrap gap-2 mt-1">
                 {CABINS.map(cabin => (
-                  <button
-                    key={cabin}
-                    type="button"
-                    onClick={() => toggleCabin(cabin)}
+                  <button key={cabin} type="button" onClick={() => toggleCabin(cabin)}
                     className="px-3 py-1.5 rounded-full border text-xs font-medium transition-all"
                     style={selectedCabins.includes(cabin)
                       ? { backgroundColor: '#4f46e5', borderColor: '#4f46e5', color: '#ffffff' }
-                      : { backgroundColor: '#ffffff', borderColor: '#e5e7eb', color: '#6b7280' }
-                    }
+                      : { backgroundColor: '#ffffff', borderColor: '#e5e7eb', color: '#6b7280' }}
                   >
                     {cabin}
                   </button>
                 ))}
               </div>
-            </div>
-            <div>
-              <label className={labelClass}>Loyalty Program (for AI tips)</label>
-              <select
-                value={program}
-                onChange={(e) => setProgram(e.target.value)}
-                className={inputClass}
-              >
-                <option value="United MileagePlus">United MileagePlus</option>
-                <option value="Delta SkyMiles">Delta SkyMiles</option>
-                <option value="American AAdvantage">American AAdvantage</option>
-              </select>
             </div>
           </div>
 
@@ -331,39 +342,19 @@ export default function App() {
             <div className="flex items-center justify-between mb-2">
               <label className={labelClass + ' mb-0'}>Programs to Search</label>
               <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedPrograms(PROGRAMS.map(p => p.code))}
-                  className="text-xs font-medium"
-                  style={{ color: '#4f46e5' }}
-                >
-                  Select all
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedPrograms([])}
-                  className="text-xs font-medium text-gray-300"
-                >
-                  Clear all
-                </button>
+                <button type="button" onClick={() => setSelectedPrograms(PROGRAMS.map(p => p.code))} className="text-xs font-medium" style={{ color: '#4f46e5' }}>Select all</button>
+                <button type="button" onClick={() => setSelectedPrograms([])} className="text-xs font-medium text-gray-300">Clear all</button>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {PROGRAMS.map(p => (
-                <label
-                  key={p.code}
+                <label key={p.code}
                   className="flex items-center gap-2 px-3 py-2 rounded-xl border text-xs cursor-pointer transition-all"
                   style={selectedPrograms.includes(p.code)
                     ? { backgroundColor: '#eef2ff', borderColor: '#c7d2fe', color: '#3730a3' }
-                    : { backgroundColor: '#fafafa', borderColor: '#f3f4f6', color: '#9ca3af' }
-                  }
+                    : { backgroundColor: '#fafafa', borderColor: '#f3f4f6', color: '#9ca3af' }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedPrograms.includes(p.code)}
-                    onChange={() => toggleProgram(p.code)}
-                    className="hidden"
-                  />
+                  <input type="checkbox" checked={selectedPrograms.includes(p.code)} onChange={() => toggleProgram(p.code)} className="hidden" />
                   <span className="font-mono font-bold text-[10px] opacity-60 flex-shrink-0">{p.code}</span>
                   <span className="truncate">{p.name}</span>
                 </label>
@@ -372,14 +363,35 @@ export default function App() {
           </div>
 
           <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={weekendOnly}
-              onChange={(e) => setWeekendOnly(e.target.checked)}
-              style={{ accentColor: '#4f46e5' }}
-            />
+            <input type="checkbox" checked={weekendOnly} onChange={(e) => setWeekendOnly(e.target.checked)} style={{ accentColor: '#4f46e5' }} />
             Weekend departures only
           </label>
+
+          {/* Points Balances — feeds AI tips */}
+          <div className="rounded-xl p-5" style={{ backgroundColor: '#f8f9fc', border: '1px solid #e5e7eb' }}>
+            <p className="text-sm font-semibold text-gray-700 mb-1">Your Points Balances <span className="font-normal text-gray-400">(optional — personalizes AI tips)</span></p>
+            <p className="text-xs text-gray-400 mb-4">Enter only the programs you have. Leave blank to skip.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(Object.keys(transferData) as CcKey[]).map(key => (
+                <div key={key} className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 w-36 flex-shrink-0">{transferData[key].name}</span>
+                  <input
+                    type="number"
+                    value={balances[key]}
+                    onChange={(e) => setBalances(prev => ({ ...prev, [key]: e.target.value }))}
+                    placeholder="e.g. 50000"
+                    min="0"
+                    className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition placeholder-gray-300"
+                  />
+                </div>
+              ))}
+            </div>
+            {hasAnyBalance && (
+              <p className="mt-3 text-xs" style={{ color: '#6366f1' }}>
+                ✓ {transferSummary.length} transfer paths computed — AI tips will reference your specific options
+              </p>
+            )}
+          </div>
 
           <button
             onClick={handleSearchFlights}
@@ -398,10 +410,7 @@ export default function App() {
 
           {lastSearchUrl && (
             <p className="text-xs text-gray-300 break-all">
-              Opened:{' '}
-              <a href={lastSearchUrl} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#818cf8' }}>
-                {lastSearchUrl}
-              </a>
+              Opened: <a href={lastSearchUrl} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#818cf8' }}>{lastSearchUrl}</a>
             </p>
           )}
 
@@ -422,28 +431,26 @@ export default function App() {
           )}
         </div>
 
-        {/* SECTION 2: POINTS TRANSFER CALCULATOR */}
+        {/* SECTION 2: YIELD CALCULATOR */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 flex flex-col gap-6">
-
           <div>
             <div className="flex items-center gap-2.5 mb-1">
               <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: '#f59e0b' }}>2</span>
               <h2 className="text-base font-semibold text-gray-900">Yield Calculator</h2>
             </div>
             <p className="text-gray-400 text-xs leading-relaxed ml-8">
-              Transfer ratios and bonuses are hardcoded reference values — verify current bonuses on each program's site before a real transfer.
+              See how many airline miles a points balance yields across all transfer partners.
+              Transfer ratios reflect standard rates as of early 2025. Credit card programs periodically
+              offer promotional transfer bonuses that may increase your mile yield — we recommend
+              confirming current rates with each program prior to initiating a transfer.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className={labelClass}>Credit Card Program</label>
-              <select
-                value={ccProgram}
-                onChange={(e) => setCcProgram(e.target.value as keyof typeof transferData)}
-                className={inputClass}
-              >
-                {Object.entries(transferData).map(([key, data]) => (
+              <select value={calcProgram} onChange={(e) => setCalcProgram(e.target.value as CcKey)} className={inputClass}>
+                {(Object.entries(transferData) as [CcKey, typeof transferData[CcKey]][]).map(([key, data]) => (
                   <option key={key} value={key}>{data.name}</option>
                 ))}
               </select>
@@ -452,8 +459,8 @@ export default function App() {
               <label className={labelClass}>Points to Transfer</label>
               <input
                 type="number"
-                value={pointsAmount}
-                onChange={(e) => setPointsAmount(e.target.value)}
+                value={calcPoints}
+                onChange={(e) => setCalcPoints(e.target.value)}
                 placeholder="e.g. 50000"
                 min="1000"
                 className={inputClass}
@@ -461,50 +468,38 @@ export default function App() {
             </div>
           </div>
 
-          <button
-            onClick={handleCalculateTransfer}
-            className="w-full py-3.5 rounded-xl font-semibold text-sm text-white transition-all"
-            style={{ backgroundColor: '#f59e0b' }}
-          >
+          <button onClick={handleCalculateTransfer} className="w-full py-3.5 rounded-xl font-semibold text-sm text-white transition-all" style={{ backgroundColor: '#f59e0b' }}>
             Calculate Transfer Yield →
           </button>
 
-          {transferResults && (
+          {calcResults && (
             <div className="flex flex-col gap-3">
-              <p className="text-sm font-medium text-gray-600">Transfer Network</p>
-              {transferResults.map((result, i) => (
-                <div
-                  key={i}
-                  className="flex justify-between items-center p-4 rounded-xl"
-                  style={{ backgroundColor: '#fafafa', border: '1px solid #f3f4f6' }}
-                >
-                  <div>
-                    <p className="font-medium text-sm text-gray-900">{result.airline}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Transfer time: {result.time}</p>
-                    {result.bonus > 0 && (
-                      <span
-                        className="inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ backgroundColor: '#fef3c7', color: '#92400e' }}
-                      >
-                        +{result.bonus * 100}% BONUS
-                      </span>
-                    )}
+              <p className="text-sm font-medium text-gray-600">Transfer partners for {transferData[calcProgram].name}</p>
+              {calcResults
+                .sort((a, b) => b.totalMiles - a.totalMiles)
+                .map((result, i) => (
+                  <div key={i} className="flex justify-between items-center p-4 rounded-xl" style={{ backgroundColor: '#fafafa', border: '1px solid #f3f4f6' }}>
+                    <div>
+                      <p className="font-medium text-sm text-gray-900">{result.airline}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Transfer time: {result.time}</p>
+                      {result.bonus > 0 && (
+                        <span className="inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
+                          +{result.bonus * 100}% BONUS
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-gray-900">{result.totalMiles.toLocaleString()}</p>
+                      <p className="text-xs text-gray-400">miles</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-gray-900">{result.totalMiles.toLocaleString()}</p>
-                    <p className="text-xs text-gray-400">miles</p>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           )}
         </div>
 
         <footer className="text-center text-xs text-gray-300 pb-6">
-          Award Architect · Personal-use demo · Real search powered by{' '}
-          <a href="https://www.pointsyeah.com" target="_blank" rel="noopener noreferrer" className="underline">
-            PointsYeah
-          </a>
+          Award Architect · Personal-use demo
         </footer>
 
       </div>

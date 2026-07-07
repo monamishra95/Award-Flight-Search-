@@ -5,15 +5,11 @@
  * Vercel Serverless Function — proxies the Gemini API call.
  *
  * GEMINI_API_KEY is read from process.env on the server only. It is set as
- * an environment variable in the Vercel project dashboard (or via
- * `vercel env add GEMINI_API_KEY`) and is NEVER bundled into client-side
- * JavaScript. This is the fix for the key-exposure issue in the original
- * client-side implementation (see README "Security" section).
+ * an environment variable in the Vercel project dashboard and is NEVER
+ * bundled into client-side JavaScript.
  */
 import { GoogleGenAI, Type } from '@google/genai';
 
-// Vercel injects req/res with Node's IncomingMessage/ServerResponse shape.
-// Typed loosely here to avoid requiring @vercel/node as a dependency.
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -27,19 +23,40 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { origin, destination, depDate, program } = req.body || {};
+    const { origin, destination, depDate, cabins, transfers } = req.body || {};
 
-    if (!origin || !destination || !depDate || !program) {
-      res.status(400).json({ error: 'Missing required fields: origin, destination, depDate, program.' });
+    if (!origin || !destination || !depDate) {
+      res.status(400).json({ error: 'Missing required fields: origin, destination, depDate.' });
       return;
     }
 
     const ai = new GoogleGenAI({ apiKey });
 
-    const prompt = `I am flying from ${origin} to ${destination} on ${depDate} using ${program} points. Provide exactly 3 short, highly strategic tips for maximizing award travel on this specific route. Return the response as a strict JSON array of strings.`;
+    // Build a personalized context string from the user's actual points balances
+    let pointsContext = '';
+    if (transfers && transfers.length > 0) {
+      // Group by CC program and summarize top options
+      const grouped: Record<string, string[]> = {};
+      for (const t of transfers) {
+        if (!grouped[t.ccName]) grouped[t.ccName] = [];
+        grouped[t.ccName].push(`${t.airline} (${t.miles.toLocaleString()} miles${t.bonus > 0 ? `, includes ${t.bonus * 100}% bonus` : ''})`);
+      }
+      const lines = Object.entries(grouped).map(([cc, airlines]) => `- ${cc}: ${airlines.join(', ')}`);
+      pointsContext = `\n\nThe traveler has the following points and computed transfer options:\n${lines.join('\n')}\n\nUse this information to give specific, actionable advice — recommend the best transfer path for this route if the data supports it.`;
+    }
+
+    const cabinContext = cabins && cabins.length > 0
+      ? `They are searching in: ${cabins.join(', ')}.`
+      : '';
+
+    const prompt = `I am planning an award flight from ${origin} to ${destination}, departing around ${depDate}. ${cabinContext}${pointsContext}
+
+Provide exactly 3 concise, strategic tips for maximizing award travel on this specific route. If points balance data was provided above, reference it directly — name the best transfer path and explain why. If no points data was provided, give general strategic tips for this route.
+
+Return the response as a strict JSON array of 3 strings.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.0-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
