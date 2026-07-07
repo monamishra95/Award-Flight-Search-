@@ -134,11 +134,11 @@ export default function App() {
   const handleSearchFlights = async () => {
     const o = origin.trim();
     if (!o) {
-      setSearchError('SYS.ERROR: Origin airport code is required.');
+      setSearchError('Origin airport code is required.');
       return;
     }
     if (selectedPrograms.length === 0) {
-      setSearchError('SYS.ERROR: Select at least one loyalty program.');
+      setSearchError('Select at least one loyalty program.');
       return;
     }
 
@@ -177,7 +177,7 @@ export default function App() {
       const { tips } = await res.json();
       setAiTips(tips);
     } catch (err: any) {
-      setSearchError(`SYS.ERROR (AI tips only — PointsYeah search still opened): ${err.message || 'Failed to fetch AI strategy.'}`);
+      setSearchError(`AI tips unavailable (PointsYeah search still opened): ${err.message || 'Failed to fetch AI strategy.'}`);
     } finally {
       setIsSearching(false);
     }
@@ -186,7 +186,7 @@ export default function App() {
   const handleCalculateTransfer = () => {
     const pts = Number(pointsAmount);
     if (!pts || pts < 1000) {
-      alert('SYS.WARNING: Enter a valid point value (min 1000).');
+      alert('Enter a valid point value (minimum 1,000).');
       return;
     }
 
@@ -207,44 +207,54 @@ export default function App() {
     setTransferResults(results);
   };
 
+  const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition placeholder-gray-300";
+  const labelClass = "block text-sm font-medium text-gray-700 mb-1.5";
+
   return (
-    <div className="min-h-screen py-12 px-6 flex justify-center box-border">
-      <div className="max-w-[900px] w-full flex flex-col gap-12">
-        <header className="border-b-[12px] border-border pb-4">
-          <h1 className="text-[clamp(3rem,7vw,5rem)] font-black tracking-tighter uppercase m-0 leading-[0.85]">
-            Award<br />Architect
-          </h1>
-          <div className="font-mono text-sm font-bold tracking-[0.15em] mt-4 flex justify-between">
-            <span>SYS.V6 // REAL_SEARCH_HANDOFF</span>
-            <span>STATUS: READY</span>
+    <div className="min-h-screen py-10 px-4 flex justify-center" style={{ backgroundColor: '#f0f4f8' }}>
+      <div className="max-w-3xl w-full flex flex-col gap-6">
+
+        {/* Header */}
+        <header className="px-1 pt-2 pb-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg" style={{ backgroundColor: '#4f46e5' }}>
+              ✈
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Award Architect</h1>
           </div>
+          <p className="text-gray-400 text-sm ml-12">
+            Real award search via PointsYeah · AI strategy tips · Points yield calculator
+          </p>
         </header>
 
         {/* SECTION 1: FLIGHT SEARCH */}
-        <div className="bg-bg border-4 border-border p-6 sm:p-10 shadow-brutal flex flex-col gap-6">
-          <h2 className="text-2xl sm:text-3xl font-black uppercase border-b-4 border-border pb-2 m-0">
-            1. Route Intelligence
-          </h2>
-          <p className="font-mono text-xs leading-relaxed text-text/80 m-0">
-            This builds a prefilled search on PointsYeah and opens it in a new tab —
-            real award availability across the programs you select below, live from
-            their data. This app does not host its own flight data.
-          </p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 flex flex-col gap-6">
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <div className="flex items-center gap-2.5 mb-1">
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: '#4f46e5' }}>1</span>
+              <h2 className="text-base font-semibold text-gray-900">Route Intelligence</h2>
+            </div>
+            <p className="text-gray-400 text-xs leading-relaxed ml-8">
+              Builds a prefilled search on PointsYeah and opens it in a new tab —
+              real award availability across the programs you select. This app does not host its own flight data.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Origin (IATA)</label>
+              <label className={labelClass}>Origin (IATA)</label>
               <input
                 type="text"
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value.toUpperCase().slice(0, 3))}
                 placeholder="JFK"
                 maxLength={3}
-                className="w-full bg-bg border-2 border-border p-4 font-mono text-base text-text box-border shadow-brutal-inset transition-all focus:outline-4 focus:outline-text focus:outline-offset-4"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Destination (IATA)</label>
+              <label className={labelClass}>Destination (IATA)</label>
               <input
                 type="text"
                 value={destination}
@@ -252,50 +262,63 @@ export default function App() {
                 placeholder="LHR"
                 maxLength={3}
                 disabled={searchAnywhere}
-                className="w-full bg-bg border-2 border-border p-4 font-mono text-base text-text box-border shadow-brutal-inset transition-all focus:outline-4 focus:outline-text focus:outline-offset-4 disabled:opacity-50"
+                className={inputClass + ' disabled:opacity-40 disabled:bg-gray-50'}
               />
-              <label className="flex items-center gap-2 mt-2 font-mono text-xs">
-                <input type="checkbox" checked={searchAnywhere} onChange={(e) => setSearchAnywhere(e.target.checked)} />
+              <label className="flex items-center gap-2 mt-2 text-xs text-gray-400 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={searchAnywhere}
+                  onChange={(e) => setSearchAnywhere(e.target.checked)}
+                  style={{ accentColor: '#4f46e5' }}
+                />
                 Search anywhere (explore mode)
               </label>
             </div>
             <div>
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Search From</label>
+              <label className={labelClass}>Search From</label>
               <input
                 type="date"
                 min={today}
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-bg border-2 border-border p-4 font-mono text-base text-text box-border shadow-brutal-inset transition-all focus:outline-4 focus:outline-text focus:outline-offset-4"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Search Through</label>
+              <label className={labelClass}>Search Through</label>
               <input
                 type="date"
                 min={startDate || today}
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-bg border-2 border-border p-4 font-mono text-base text-text box-border shadow-brutal-inset transition-all focus:outline-4 focus:outline-text focus:outline-offset-4"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Cabins</label>
-              <div className="flex flex-wrap gap-3 font-mono text-xs">
+              <label className={labelClass}>Cabins</label>
+              <div className="flex flex-wrap gap-2 mt-1">
                 {CABINS.map(cabin => (
-                  <label key={cabin} className="flex items-center gap-1">
-                    <input type="checkbox" checked={selectedCabins.includes(cabin)} onChange={() => toggleCabin(cabin)} />
+                  <button
+                    key={cabin}
+                    type="button"
+                    onClick={() => toggleCabin(cabin)}
+                    className="px-3 py-1.5 rounded-full border text-xs font-medium transition-all"
+                    style={selectedCabins.includes(cabin)
+                      ? { backgroundColor: '#4f46e5', borderColor: '#4f46e5', color: '#ffffff' }
+                      : { backgroundColor: '#ffffff', borderColor: '#e5e7eb', color: '#6b7280' }
+                    }
+                  >
                     {cabin}
-                  </label>
+                  </button>
                 ))}
               </div>
             </div>
             <div>
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Loyalty Program (for AI tips)</label>
+              <label className={labelClass}>Loyalty Program (for AI tips)</label>
               <select
                 value={program}
                 onChange={(e) => setProgram(e.target.value)}
-                className="w-full bg-bg border-2 border-border p-4 font-mono text-base text-text box-border shadow-brutal-inset transition-all focus:outline-4 focus:outline-text focus:outline-offset-4 appearance-none rounded-none"
+                className={inputClass}
               >
                 <option value="United MileagePlus">United MileagePlus</option>
                 <option value="Delta SkyMiles">Delta SkyMiles</option>
@@ -305,73 +328,120 @@ export default function App() {
           </div>
 
           <div>
-            <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Programs to Search</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs">
+            <div className="flex items-center justify-between mb-2">
+              <label className={labelClass + ' mb-0'}>Programs to Search</label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPrograms(PROGRAMS.map(p => p.code))}
+                  className="text-xs font-medium"
+                  style={{ color: '#4f46e5' }}
+                >
+                  Select all
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPrograms([])}
+                  className="text-xs font-medium text-gray-300"
+                >
+                  Clear all
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {PROGRAMS.map(p => (
-                <label key={p.code} className="flex items-center gap-1">
-                  <input type="checkbox" checked={selectedPrograms.includes(p.code)} onChange={() => toggleProgram(p.code)} />
-                  {p.code} — {p.name}
+                <label
+                  key={p.code}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl border text-xs cursor-pointer transition-all"
+                  style={selectedPrograms.includes(p.code)
+                    ? { backgroundColor: '#eef2ff', borderColor: '#c7d2fe', color: '#3730a3' }
+                    : { backgroundColor: '#fafafa', borderColor: '#f3f4f6', color: '#9ca3af' }
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedPrograms.includes(p.code)}
+                    onChange={() => toggleProgram(p.code)}
+                    className="hidden"
+                  />
+                  <span className="font-mono font-bold text-[10px] opacity-60 flex-shrink-0">{p.code}</span>
+                  <span className="truncate">{p.name}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          <label className="flex items-center gap-2 font-mono text-xs">
-            <input type="checkbox" checked={weekendOnly} onChange={(e) => setWeekendOnly(e.target.checked)} />
+          <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={weekendOnly}
+              onChange={(e) => setWeekendOnly(e.target.checked)}
+              style={{ accentColor: '#4f46e5' }}
+            />
             Weekend departures only
           </label>
 
           <button
             onClick={handleSearchFlights}
             disabled={isSearching}
-            className="bg-text text-bg border-none p-5 font-sans text-lg font-black uppercase tracking-[0.1em] cursor-pointer shadow-brutal-btn transition-all w-full mt-4 flex justify-center items-center active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-btn-active disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full py-3.5 rounded-xl font-semibold text-sm text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ backgroundColor: isSearching ? '#818cf8' : '#4f46e5' }}
           >
-            {isSearching ? 'OPENING REAL SEARCH...' : 'Search Real Award Availability'}
+            {isSearching ? 'Opening search on PointsYeah...' : 'Search Real Award Availability →'}
           </button>
 
           {searchError && (
-            <div className="mt-4 p-4 border-2 border-red-600 bg-red-100 text-red-800 font-mono text-sm font-bold">
+            <div className="p-4 rounded-xl text-sm text-red-600" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}>
               {searchError}
             </div>
           )}
 
           {lastSearchUrl && (
-            <div className="font-mono text-xs break-all border-2 border-border p-3 bg-[#d4d4d4]">
-              Opened: <a href={lastSearchUrl} target="_blank" rel="noopener noreferrer" className="underline">{lastSearchUrl}</a>
-            </div>
+            <p className="text-xs text-gray-300 break-all">
+              Opened:{' '}
+              <a href={lastSearchUrl} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#818cf8' }}>
+                {lastSearchUrl}
+              </a>
+            </p>
           )}
 
           {aiTips && (
-            <div className="flex flex-col gap-4 mt-2">
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">AI Strategic Brief (general advice, not live data)</label>
-              <div className="bg-[#d4d4d4] p-6 border-l-8 border-border font-mono text-sm leading-relaxed">
-                <ul className="m-0 pl-5 list-disc">
-                  {aiTips.map((tip, i) => (
-                    <li key={i} className="mb-2">{tip}</li>
-                  ))}
-                </ul>
-              </div>
+            <div className="rounded-xl p-5" style={{ backgroundColor: '#eef2ff', border: '1px solid #c7d2fe' }}>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: '#6366f1' }}>
+                AI Strategic Brief · General advice, not live data
+              </p>
+              <ol className="flex flex-col gap-2.5 list-none m-0 p-0">
+                {aiTips.map((tip, i) => (
+                  <li key={i} className="flex gap-3 text-sm" style={{ color: '#374151' }}>
+                    <span className="font-bold flex-shrink-0" style={{ color: '#818cf8' }}>{i + 1}.</span>
+                    {tip}
+                  </li>
+                ))}
+              </ol>
             </div>
           )}
         </div>
 
         {/* SECTION 2: POINTS TRANSFER CALCULATOR */}
-        <div className="bg-bg border-4 border-border p-6 sm:p-10 shadow-brutal flex flex-col gap-6">
-          <h2 className="text-2xl sm:text-3xl font-black uppercase border-b-4 border-border pb-2 m-0">
-            2. Yield Calculator
-          </h2>
-          <p className="font-mono text-xs leading-relaxed text-text/80 m-0">
-            Transfer ratios and bonuses below are hardcoded reference values and may
-            drift out of date — verify current bonuses on each program's site before
-            relying on this for a real transfer decision.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8 flex flex-col gap-6">
+
+          <div>
+            <div className="flex items-center gap-2.5 mb-1">
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: '#f59e0b' }}>2</span>
+              <h2 className="text-base font-semibold text-gray-900">Yield Calculator</h2>
+            </div>
+            <p className="text-gray-400 text-xs leading-relaxed ml-8">
+              Transfer ratios and bonuses are hardcoded reference values — verify current bonuses on each program's site before a real transfer.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Credit Card Program</label>
+              <label className={labelClass}>Credit Card Program</label>
               <select
                 value={ccProgram}
                 onChange={(e) => setCcProgram(e.target.value as keyof typeof transferData)}
-                className="w-full bg-bg border-2 border-border p-4 font-mono text-base text-text box-border shadow-brutal-inset transition-all focus:outline-4 focus:outline-text focus:outline-offset-4 appearance-none rounded-none"
+                className={inputClass}
               >
                 {Object.entries(transferData).map(([key, data]) => (
                   <option key={key} value={key}>{data.name}</option>
@@ -379,47 +449,64 @@ export default function App() {
               </select>
             </div>
             <div>
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Points to Transfer</label>
+              <label className={labelClass}>Points to Transfer</label>
               <input
                 type="number"
                 value={pointsAmount}
                 onChange={(e) => setPointsAmount(e.target.value)}
                 placeholder="e.g. 50000"
                 min="1000"
-                className="w-full bg-bg border-2 border-border p-4 font-mono text-base text-text box-border shadow-brutal-inset transition-all focus:outline-4 focus:outline-text focus:outline-offset-4"
+                className={inputClass}
               />
             </div>
           </div>
 
           <button
             onClick={handleCalculateTransfer}
-            className="bg-text text-bg border-none p-5 font-sans text-lg font-black uppercase tracking-[0.1em] cursor-pointer shadow-brutal-btn transition-all w-full mt-4 flex justify-center items-center active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-btn-active"
+            className="w-full py-3.5 rounded-xl font-semibold text-sm text-white transition-all"
+            style={{ backgroundColor: '#f59e0b' }}
           >
-            Calculate Yield
+            Calculate Transfer Yield →
           </button>
 
           {transferResults && (
-            <div className="flex flex-col gap-4 mt-4">
-              <label className="block font-black text-[0.85rem] uppercase tracking-[0.1em] border-b-2 border-border pb-1 w-max mb-2">Transfer Network</label>
-              <div className="flex flex-col gap-4">
-                {transferResults.map((result, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 border-2 border-border font-mono bg-bg gap-2 sm:gap-0">
-                    <div>
-                      <strong>{result.airline}</strong><br />
-                      Time: {result.time}
-                      {result.bonus > 0 && (
-                        <><br /><span className="bg-text text-bg px-2 py-1 text-[0.7rem] font-bold mt-1 inline-block">{result.bonus * 100}% TRANSFER BONUS</span></>
-                      )}
-                    </div>
-                    <div className="text-xl font-bold sm:text-right">
-                      {result.totalMiles.toLocaleString()} MI
-                    </div>
+            <div className="flex flex-col gap-3">
+              <p className="text-sm font-medium text-gray-600">Transfer Network</p>
+              {transferResults.map((result, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between items-center p-4 rounded-xl"
+                  style={{ backgroundColor: '#fafafa', border: '1px solid #f3f4f6' }}
+                >
+                  <div>
+                    <p className="font-medium text-sm text-gray-900">{result.airline}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Transfer time: {result.time}</p>
+                    {result.bonus > 0 && (
+                      <span
+                        className="inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: '#fef3c7', color: '#92400e' }}
+                      >
+                        +{result.bonus * 100}% BONUS
+                      </span>
+                    )}
                   </div>
-                ))}
-              </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-gray-900">{result.totalMiles.toLocaleString()}</p>
+                    <p className="text-xs text-gray-400">miles</p>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
+
+        <footer className="text-center text-xs text-gray-300 pb-6">
+          Award Architect · Personal-use demo · Real search powered by{' '}
+          <a href="https://www.pointsyeah.com" target="_blank" rel="noopener noreferrer" className="underline">
+            PointsYeah
+          </a>
+        </footer>
+
       </div>
     </div>
   );
