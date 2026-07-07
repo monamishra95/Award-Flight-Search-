@@ -265,10 +265,10 @@ export default function App() {
             <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg" style={{ backgroundColor: '#4f46e5' }}>
               ✈
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Award Architect</h1>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Award Flight Architect</h1>
           </div>
           <p className="text-gray-400 text-sm ml-12">
-            Real award search · Personalized AI strategy · Points yield calculator
+            Book flights with miles · Personalized travel strategy · Points &amp; Miles yield calculator
           </p>
         </header>
 
@@ -415,18 +415,25 @@ export default function App() {
           )}
 
           {aiTips && (
-            <div className="rounded-xl p-5" style={{ backgroundColor: '#eef2ff', border: '1px solid #c7d2fe' }}>
-              <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: '#6366f1' }}>
-                AI Strategic Brief · General advice, not live data
-              </p>
-              <ol className="flex flex-col gap-2.5 list-none m-0 p-0">
+            <div className="rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 16px rgba(79, 70, 229, 0.18)', border: '1px solid #818cf8' }}>
+              {/* Header bar */}
+              <div className="px-5 py-3 flex items-center gap-2" style={{ backgroundColor: '#4f46e5' }}>
+                <span className="text-white text-sm">✦</span>
+                <p className="text-xs font-bold uppercase tracking-widest text-white">AI Strategic Brief</p>
+                <span className="ml-auto text-[10px] text-indigo-200 text-right hidden sm:block">Based on your route &amp; points balances — not live availability</span>
+              </div>
+              {/* Tips body */}
+              <div className="p-5 flex flex-col gap-3" style={{ backgroundColor: '#f5f3ff' }}>
+                <p className="text-[10px] text-indigo-400 sm:hidden">Based on your route &amp; points balances — not live availability</p>
                 {aiTips.map((tip, i) => (
-                  <li key={i} className="flex gap-3 text-sm" style={{ color: '#374151' }}>
-                    <span className="font-bold flex-shrink-0" style={{ color: '#818cf8' }}>{i + 1}.</span>
-                    {tip}
-                  </li>
+                  <div key={i} className="flex gap-3 items-start">
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 text-white mt-0.5" style={{ backgroundColor: '#4f46e5' }}>
+                      {i + 1}
+                    </span>
+                    <p className="text-sm leading-relaxed" style={{ color: '#312e81' }}>{tip}</p>
+                  </div>
                 ))}
-              </ol>
+              </div>
             </div>
           )}
         </div>
